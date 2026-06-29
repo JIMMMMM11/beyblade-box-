@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beyblade X 戰術整備庫 Pro</title>
+    <title>Beyblade X 戰術整備庫 Pro Max</title>
     <style>
         :root {
             --primary: #ff4757;
@@ -12,6 +12,7 @@
             --card-bg: #ffffff;
             --text: #2f3542;
             --success: #2ed573;
+            --danger: #ff6b81;
         }
         body {
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
@@ -21,7 +22,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1250px;
             margin: 0 auto;
         }
         h1, h2 {
@@ -35,7 +36,7 @@
             gap: 20px;
         }
         @media (min-width: 992px) {
-            .grid { grid-template-columns: 1.2fr 1fr; }
+            .grid { grid-template-columns: 1.1fr 1fr; }
         }
         .card {
             background: var(--card-bg);
@@ -80,12 +81,25 @@
             background: var(--secondary);
             color: white;
         }
+        .delete-part-btn {
+            background: none;
+            border: none;
+            color: #a4b0be;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 2px 0 6px;
+            font-size: 1.1em;
+            transition: color 0.2s;
+        }
+        .chip.active .delete-part-btn { color: #ffffffd0; }
+        .delete-part-btn:hover { color: var(--primary) !important; }
+        
         .add-form {
             display: flex;
             gap: 8px;
             margin-top: 10px;
         }
-        .add-form input, .add-form select {
+        .add-form input {
             flex: 1;
             padding: 8px 10px;
             border: 1px solid #ccc;
@@ -99,12 +113,11 @@
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9em;
             transition: background 0.2s;
         }
         .add-form button:hover { background: #57606f; }
         
-        /* Combo 樣式 */
+        /* Combo 卡片樣式 */
         .combo-card {
             border: 1px solid #e4e7eb;
             padding: 15px;
@@ -119,7 +132,7 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        .combo-title { font-weight: bold; font-size: 1.1em; color: var(--primary); }
+        .combo-title { font-weight: bold; font-size: 1.1em; color: var(--primary); padding-right: 140px; }
         .badge {
             padding: 4px 8px;
             border-radius: 4px;
@@ -128,6 +141,17 @@
         }
         .badge.ready { background: var(--success); color: white; }
         .badge.missing { background: #ffa502; color: white; }
+        
+        /* 新型態標籤 */
+        .type-badge {
+            background: #e1b12c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
         .parts-needed span {
             background: #ffffff;
             padding: 2px 6px;
@@ -142,6 +166,39 @@
             border-color: #99e9f2;
         }
         
+        .action-container {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 5px;
+        }
+        .action-btn {
+            background: white;
+            border: 1px solid #ced4da;
+            color: #747d8c;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .action-btn:hover { background: #f1f2f6; }
+        .action-btn.del:hover { background: var(--danger); color: white; }
+
+        /* QR Code 彈出層 */
+        .qr-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .qr-box {
+            background: white; padding: 25px; border-radius: 12px; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
         /* 統計面板 */
         .stats-container {
             display: flex;
@@ -150,7 +207,6 @@
             background: #f1f2f6;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
         }
         .stat-box h4 { margin: 0 0 5px 0; color: #57606f; }
         .stat-box p { margin: 0; font-size: 1.5em; font-weight: bold; color: var(--secondary); }
@@ -159,19 +215,20 @@
 <body>
 
 <div class="container">
-    <h1>🌀 Beyblade X 戰術整備庫 Pro</h1>
+    <h1>🌀 Beyblade X 戰術整備庫 Pro Max</h1>
     
     <div class="card" style="margin-bottom: 20px;">
-        <h3>📊 我的收藏統計</h3>
+        <h3>📊 我的收藏與實戰數據統計</h3>
         <div class="stats-container">
             <div class="stat-box"><h4>Blade 數量</h4><p id="stat-blades">0</p></div>
             <div class="stat-box"><h4>Ratchet 數量</h4><p id="stat-ratchets">0</p></div>
             <div class="stat-box"><h4>Bit 數量</h4><p id="stat-bits">0</p></div>
-            <div class="stat-box"><h4>已解鎖組法</h4><p id="stat-combos">0 / 0</p></div>
+            <div class="stat-box"><h4>可出賽組法</h4><p id="stat-combos">0 / 0</p></div>
         </div>
     </div>
     
     <div class="grid">
+        <!-- 左側：我的零件庫 -->
         <div>
             <div class="card">
                 <h2>🛠️ 我的零件庫</h2>
@@ -180,7 +237,7 @@
                     <h3>Blade (鋼鐵輪盤)</h3>
                     <div class="checkbox-group" id="blade-group"></div>
                     <div class="add-form">
-                        <input type="text" id="new-blade-input" placeholder="新增 Blade... (例如: Leon Crest)">
+                        <input type="text" id="new-blade-input" placeholder="新增 Blade 名稱...">
                         <button onclick="addNewPart('blade-group', 'new-blade-input', 'blades')">＋</button>
                     </div>
                 </div>
@@ -189,7 +246,7 @@
                     <h3>Ratchet (齒輪)</h3>
                     <div class="checkbox-group" id="ratchet-group"></div>
                     <div class="add-form">
-                        <input type="text" id="new-ratchet-input" placeholder="新增 Ratchet... (例如: 7-60)">
+                        <input type="text" id="new-ratchet-input" placeholder="新增 Ratchet 名稱...">
                         <button onclick="addNewPart('ratchet-group', 'new-ratchet-input', 'ratchets')">＋</button>
                     </div>
                 </div>
@@ -198,26 +255,27 @@
                     <h3>Bit (軸心)</h3>
                     <div class="checkbox-group" id="bit-group"></div>
                     <div class="add-form">
-                        <input type="text" id="new-bit-input" placeholder="新增 Bit... (例如: Q (Quake))">
+                        <input type="text" id="new-bit-input" placeholder="新增 Bit 名稱...">
                         <button onclick="addNewPart('bit-group', 'new-bit-input', 'bits')">＋</button>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- 右側：自訂組法 -->
         <div>
             <div class="card">
                 <h2>➕ 記錄新戰術組法</h2>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <input type="text" id="custom-combo-name" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="輸入組法名稱 (例如：群友推薦重擊流)">
+                    <input type="text" id="custom-combo-name" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="輸入組法名稱">
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                        <select id="select-blade"><option value="">選擇 Blade</option></select>
-                        <select id="select-ratchet"><option value="">選擇 Ratchet</option></select>
-                        <select id="select-bit"><option value="">選擇 Bit</option></select>
+                        <select id="select-blade" style="padding: 8px;"><option value="">選擇 Blade</option></select>
+                        <select id="select-ratchet" style="padding: 8px;"><option value="">選擇 Ratchet</option></select>
+                        <select id="select-bit" style="padding: 8px;"><option value="">選擇 Bit</option></select>
                     </div>
                     
-                    <input type="text" id="custom-combo-desc" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="簡短戰術說明（選填）">
+                    <input type="text" id="custom-combo-desc" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="戰術筆記（選填）">
                     <button onclick="addCustomCombo()" style="background: var(--primary); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 儲存此配置</button>
                 </div>
             </div>
@@ -230,8 +288,18 @@
     </div>
 </div>
 
+<!-- QR Code 彈出視窗 -->
+<div class="qr-overlay" id="qrOverlay" onclick="closeQR()">
+    <div class="qr-box" onclick="event.stopPropagation()">
+        <h3 id="qrTitle">戰術 QR Code 分享</h3>
+        <img id="qrImage" src="" alt="QR Code" style="margin: 15px 0; width: 180px; height: 180px;">
+        <p style="font-size: 0.85em; color: #666;">讓隊友掃描此 QR Code，即可手動照抄配置！</p>
+        <button onclick="closeQR()" style="padding: 6px 15px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer;">關閉</button>
+    </div>
+</div>
+
 <script>
-// 初始預設資料庫
+// 基礎數據（含部分重量與型態判定邏輯）
 const defaultParts = {
     blades: ["Phoenix Wing (鳳凰之翼)", "Dran Buster (德蘭毀滅者)", "Wizard Rod (魔導神杖)", "Cobalt Dragoon (深藍龍騎)"],
     ratchets: ["9-60", "1-60", "5-60", "3-60"],
@@ -239,15 +307,20 @@ const defaultParts = {
 };
 
 const defaultCombos = [
-    { name: "賽事常客：不死鳥持久流", blade: "Phoenix Wing (鳳凰之翼)", ratchet: "9-60", bit: "B (Ball)", desc: "最穩健的配置之一。" },
-    { name: "極限極端：德蘭一擊必殺流", blade: "Dran Buster (德蘭毀滅者)", ratchet: "1-60", bit: "F (Flat)", desc: "徹底特化攻擊力。" },
-    { name: "防禦壁壘：魔導六角流", blade: "Wizard Rod (魔導神杖)", ratchet: "5-60", bit: "H (Hexa)", desc: "高重心的魔導神杖加上穩定度極高的 Hexa 軸。" }
+    { name: "賽事常客：不死鳥持久流", blade: "Phoenix Wing (鳳凰之翼)", ratchet: "9-60", bit: "B (Ball)", desc: "持久防禦神配置。" },
+    { name: "極限極端：德蘭一擊必殺流", blade: "Dran Buster (德蘭毀滅者)", ratchet: "1-60", bit: "F (Flat)", desc: "開局極限制空攻擊。" }
 ];
 
-// 從 LocalStorage 讀取資料，若無則用預設值
 let partsData = JSON.parse(localStorage.getItem('partsData')) || defaultParts;
 let recommendedCombos = JSON.parse(localStorage.getItem('recommendedCombos')) || defaultCombos;
 let myInventory = JSON.parse(localStorage.getItem('myInventory')) || { blades: [], ratchets: [], bits: [] };
+
+// 模擬重量字典（估算用）
+const weightDict = {
+    "Phoenix Wing (鳳凰之翼)": 35, "Dran Buster (德蘭毀滅者)": 35, "Wizard Rod (魔導神杖)": 36, "Cobalt Dragoon (深藍龍騎)": 35,
+    "9-60": 6, "1-60": 6, "5-60": 6, "3-60": 6,
+    "B (Ball)": 2, "F (Flat)": 2, "H (Hexa)": 2, "A (Accent)": 2
+};
 
 function init() {
     renderCategory('blade-group', partsData.blades, 'blades');
@@ -263,18 +336,20 @@ function saveData() {
     localStorage.setItem('myInventory', JSON.stringify(myInventory));
 }
 
-// 渲染零件 Chips
 function renderCategory(containerId, dataArray, category) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
-    
     dataArray.forEach(part => {
         const label = document.createElement('label');
         label.className = 'chip';
         const isChecked = myInventory[category].includes(part);
         if(isChecked) label.classList.add('active');
         
-        label.innerHTML = `<input type="checkbox" value="${part}" ${isChecked ? 'checked' : ''}> ${part}`;
+        label.innerHTML = `
+            <input type="checkbox" value="${part}" ${isChecked ? 'checked' : ''}> 
+            <span>${part}</span>
+            <button class="delete-part-btn">×</button>
+        `;
         
         label.querySelector('input').addEventListener('change', function() {
             if(this.checked) {
@@ -287,18 +362,28 @@ function renderCategory(containerId, dataArray, category) {
             saveData();
             checkCombos();
         });
+
+        label.querySelector('.delete-part-btn').addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            if(confirm(`確定刪除「${part}」嗎？`)) {
+                partsData[category] = partsData[category].filter(item => item !== part);
+                myInventory[category] = myInventory[category].filter(item => item !== part);
+                saveData();
+                renderCategory(containerId, partsData[category], category);
+                updateSelectOptions();
+                checkCombos();
+            }
+        });
         container.appendChild(label);
     });
     updateStats();
 }
 
-// 動態新增零件
 function addNewPart(containerId, inputId, category) {
     const inputEl = document.getElementById(inputId);
     const partName = inputEl.value.trim();
     if (!partName) return;
     if (partsData[category].includes(partName)) { alert('零件已存在！'); return; }
-    
     partsData[category].push(partName);
     saveData();
     renderCategory(containerId, partsData[category], category);
@@ -306,7 +391,6 @@ function addNewPart(containerId, inputId, category) {
     inputEl.value = '';
 }
 
-// 更新下拉選單
 function updateSelectOptions() {
     fillSelect('select-blade', partsData.blades);
     fillSelect('select-ratchet', partsData.ratchets);
@@ -316,13 +400,10 @@ function fillSelect(selectId, data) {
     const select = document.getElementById(selectId);
     const tempValue = select.value;
     select.innerHTML = `<option value="">請選擇</option>`;
-    data.forEach(item => {
-        select.innerHTML += `<option value="${item}">${item}</option>`;
-    });
+    data.forEach(item => { select.innerHTML += `<option value="${item}">${item}</option>`; });
     select.value = tempValue;
 }
 
-// 新增自訂組法
 function addCustomCombo() {
     const name = document.getElementById('custom-combo-name').value.trim();
     const blade = document.getElementById('select-blade').value;
@@ -331,37 +412,65 @@ function addCustomCombo() {
     const desc = document.getElementById('custom-combo-desc').value.trim() || "自訂戰術配置";
     
     if(!name || !blade || !ratchet || !bit) { alert('請填齊組法名稱與三個零件！'); return; }
-    
     recommendedCombos.push({ name, blade, ratchet, bit, desc });
     saveData();
     checkCombos();
     
-    // 清空輸入
     document.getElementById('custom-combo-name').value = '';
     document.getElementById('custom-combo-desc').value = '';
-    document.getElementById('select-blade').value = '';
-    document.getElementById('select-ratchet').value = '';
-    document.getElementById('select-bit').value = '';
 }
 
-// 核心比對邏輯與統計更新
+function deleteCombo(index) {
+    if(confirm(`確定要刪除這個戰術配置嗎？`)) {
+        recommendedCombos.splice(index, 1);
+        saveData();
+        checkCombos();
+    }
+}
+
+// 判定陀螺屬性型態
+function getComboType(bitName) {
+    if (bitName.includes('F') || bitName.includes('Flat')) return '💥 攻擊型';
+    if (bitName.includes('B') || bitName.includes('Ball')) return '⏳ 持久型';
+    if (bitName.includes('H') || bitName.includes('Hexa')) return '🛡️ 防禦型';
+    return '⚖️ 平衡型';
+}
+
+// 顯示分享用 QR Code
+function shareCombo(name, b, r, bit) {
+    const textData = `戰術名稱: ${name}\n配置: ${b} + ${r} + ${bit}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(textData)}`;
+    document.getElementById('qrTitle').innerText = name;
+    document.getElementById('qrImage').src = qrUrl;
+    document.getElementById('qrOverlay').style.display = 'flex';
+}
+function closeQR() { document.getElementById('qrOverlay').style.display = 'none'; }
+
 function checkCombos() {
     const comboListContainer = document.getElementById('combo-list');
     comboListContainer.innerHTML = '';
     let readyCount = 0;
     
-    recommendedCombos.forEach(combo => {
+    recommendedCombos.forEach((combo, index) => {
         const hasBlade = myInventory.blades.includes(combo.blade);
         const hasRatchet = myInventory.ratchets.includes(combo.ratchet);
         const hasBit = myInventory.bits.includes(combo.bit);
         const isReady = hasBlade && hasRatchet && hasBit;
         if(isReady) readyCount++;
         
+        // 計算估算總重量
+        const totalWeight = (weightDict[combo.blade] || 34) + (weightDict[combo.ratchet] || 6) + (weightDict[combo.bit] || 2);
+        const comboType = getComboType(combo.bit);
+
         const comboCard = document.createElement('div');
         comboCard.className = 'combo-card';
         comboCard.innerHTML = `
+            <div class="action-container">
+                <button class="action-btn" onclick="shareCombo('${combo.name}', '${combo.blade}', '${combo.ratchet}', '${combo.bit}')">🔗 分享</button>
+                <button class="action-btn del" onclick="deleteCombo(${index})">🗑️</button>
+            </div>
             <div class="combo-header">
-                <div class="combo-title">${combo.name}</div>
+                <div class="combo-title">${combo.name} <span class="type-badge">${comboType}</span></div>
                 <div class="badge ${isReady ? 'ready' : 'missing'}">${isReady ? '🟢 可組裝' : '🔴 缺零件'}</div>
             </div>
             <div class="parts-needed">
@@ -369,11 +478,11 @@ function checkCombos() {
                 <span class="${hasRatchet ? 'owned' : ''}">⬡ ${combo.ratchet}</span>+ 
                 <span class="${hasBit ? 'owned' : ''}">☖ ${combo.bit}</span>
             </div>
-            <p style="font-size: 0.9em; color: #666; margin-top: 10px; margin-bottom: 0;"><strong>說明：</strong>${combo.desc}</p>
+            <div style="font-size: 0.85em; color: #747d8c; margin-top: 8px;">⚖️ 估算總重量：約 ${totalWeight} g</div>
+            <p style="font-size: 0.9em; color: #666; margin-top: 6px; margin-bottom: 0;"><strong>備忘：</strong>${combo.desc}</p>
         `;
         comboListContainer.appendChild(comboCard);
     });
-    
     document.getElementById('stat-combos').innerText = `${readyCount} / ${recommendedCombos.length}`;
 }
 
